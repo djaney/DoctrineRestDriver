@@ -74,14 +74,12 @@ class MysqlToRequest {
      */
     public function transform($query, array $params = []) {
         $query = array_reduce($params, function($query, $param) {
-            return strpos($query, '?') ? substr_replace($query, $param, strpos($query, '?'), strlen('?')) : $query;
+            return strpos($query, '?') ? substr_replace($query, '"'.$param.'"', strpos($query, '?'), strlen('?')) : $query;
         }, $query);
-
         $queryParts = explode(' ', $query);
         $transformedQuery = array_reduce($queryParts, function($carry, $part) {
             return $carry . (Assertions::isUrl($part) ? ('"' . $part . '" ') : ($part . ' '));
         });
-
         return $this->requestFactory->createOne($this->parser->parse($transformedQuery), $this->apiUrl, $this->options);
     }
 }

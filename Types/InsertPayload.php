@@ -44,9 +44,14 @@ class InsertPayload {
             return $token['expr_type'] === 'column-list';
         });
 
-        $columns = explode(',', str_replace(['(', ')', ' '], '', end($columns)['base_expr']));
-        $values  = explode(',', str_replace(['(', ')', ' '], '', end($tokens['VALUES'])['base_expr']));
+        $re = "/\"([^\"]*)(\",|\"\\))/";
+        $str = end($tokens['VALUES'])['base_expr'];
 
+        preg_match_all($re, $str, $matches);
+        $columns = explode(',', str_replace(['(', ')', ' '], '', end($columns)['base_expr']));
+        // $values  = explode(',', str_replace(['(', ')', ' '], '', end($tokens['VALUES'])['base_expr']));
+        $values = $matches[1];
+        var_dump($values);exit;
         return json_encode(array_combine($columns, array_map(function($value) {
             return Value::create($value);
         }, $values)));
