@@ -73,9 +73,16 @@ class MysqlToRequest {
      * @SuppressWarnings("PHPMD.StaticAccess")
      */
     public function transform($query, array $params = []) {
-        $query = array_reduce($params, function($query, $param) {
-            return strpos($query, '?') ? substr_replace($query, '"'.$param.'"', strpos($query, '?'), strlen('?')) : $query;
-        }, $query);
+        if(strtolower(substr($query,0,6))=='insert'){
+            $query = array_reduce($params, function($query, $param) {
+                return strpos($query, '?') ? substr_replace($query, '"'.$param.'"', strpos($query, '?'), strlen('?')) : $query;
+            }, $query);
+        }else{
+            $query = array_reduce($params, function($query, $param) {
+                return strpos($query, '?') ? substr_replace($query, $param, strpos($query, '?'), strlen('?')) : $query;
+            }, $query);
+        }
+
         $queryParts = explode(' ', $query);
         $transformedQuery = array_reduce($queryParts, function($carry, $part) {
             return $carry . (Assertions::isUrl($part) ? ('"' . $part . '" ') : ($part . ' '));
