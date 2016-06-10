@@ -34,7 +34,7 @@
   },
   "require": {
     "php": ">=5.5",
-    "symfony/framework-bundle": "^3.0",
+    "symfony/framework-bundle": "2.8.*",
     "doctrine/dbal": "^2.5",
     "greenlion/php-sql-parser": "^4.0",
     "doctrine/orm": "^2.5",
