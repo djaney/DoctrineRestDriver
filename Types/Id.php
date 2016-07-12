@@ -41,8 +41,9 @@ class Id {
 
         if (empty($tokens['WHERE'])) return '';
 
-        $idAlias = self::alias($tokens);
 
+
+        $idAlias = self::alias($tokens);
         return array_reduce($tokens['WHERE'], function($carry, $token) use ($tokens, $idAlias) {
             if (!is_int($carry)) return $carry;
             if ($token['expr_type'] === 'colref' && $token['base_expr'] === $idAlias) return $tokens['WHERE'][$carry+2]['base_expr'];
@@ -60,6 +61,12 @@ class Id {
      */
     public static function alias(array $tokens) {
         $tableAlias = Table::alias($tokens);
-        return empty($tableAlias) ? 'id' : $tableAlias . '.id';
+        if(isset($tokens['UPDATE'])){
+            $first = reset($tokens['WHERE']);
+            return empty($tableAlias) ? $first['base_expr'] : $tableAlias . '.' . $first['base_expr'];
+        }else{
+            return empty($tableAlias) ? 'id' : $tableAlias . '.id';
+        }
+
     }
 }
