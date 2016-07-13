@@ -248,7 +248,9 @@ class Statement implements \IteratorAggregate, StatementInterface {
      */
     private function onSuccess(Response $response, $method) {
         $this->result = Result::create($this->query, json_decode($response->getContent(), true));
-        $this->id     = $method === HttpMethods::POST ? $this->result['id'] : null;
+        $idField = $response->headers->has('EntityId') ? $response->headers->get('EntityId') : 'id';
+        $this->id     = $method === HttpMethods::POST ? $this->result[$idField] : null;
+
         krsort($this->result);
 
         return true;
