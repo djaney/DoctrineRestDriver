@@ -154,7 +154,10 @@ class Statement implements \IteratorAggregate, StatementInterface {
         $method     = strtolower($request->getMethod());
         $response   = $method === HttpMethods::GET || $method === HttpMethods::DELETE ? $restClient->$method($request->getUrlAndQuery()) : $restClient->$method($request->getUrlAndQuery(), $request->getPayload());
         $statusCode = $response->getStatusCode();
-
+        if(!json_encode($response->getContent())){
+            // if error
+            return Exceptions::RequestFailedException($request, 500, $response->getContent());
+        }
         return $statusCode === 200 || ($method === HttpMethods::DELETE && $statusCode === 204) ? $this->onSuccess($response, $method) : $this->onError($request, $response);
     }
 
