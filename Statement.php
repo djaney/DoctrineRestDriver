@@ -154,7 +154,10 @@ class Statement implements \IteratorAggregate, StatementInterface {
         $method     = strtolower($request->getMethod());
         $response   = $method === HttpMethods::GET || $method === HttpMethods::DELETE ? $restClient->$method($request->getUrlAndQuery()) : $restClient->$method($request->getUrlAndQuery(), $request->getPayload());
         $statusCode = $response->getStatusCode();
-
+        if(!json_encode($response->getContent())){
+            // if error
+            return Exceptions::RequestFailedException($request, 500, $response->getContent());
+        }
         return $statusCode === 200 || ($method === HttpMethods::DELETE && $statusCode === 204) ? $this->onSuccess($response, $method) : $this->onError($request, $response);
     }
 
@@ -248,7 +251,9 @@ class Statement implements \IteratorAggregate, StatementInterface {
      */
     private function onSuccess(Response $response, $method) {
         $this->result = Result::create($this->query, json_decode($response->getContent(), true));
-        $this->id     = $method === HttpMethods::POST ? $this->result['id'] : null;
+        $idField = $response->headers->has('EntityId') ? $response->headers->get('EntityId') : 'id';
+        $this->id     = $method === HttpMethods::POST ? $this->result[$idField] : null;
+
         krsort($this->result);
 
         return true;
